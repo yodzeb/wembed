@@ -1,0 +1,16 @@
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<div id="app">{{ message }}
+  <button v-on:click="update_corpus()">update</button>
+  <div>
+    <ul>
+      <li v-for="item of corpus_list">{{ item }}</li>
+    </ul>
+  </div>
+
+</div>
+
+
+
+<script src="js/app.js">
+</script>

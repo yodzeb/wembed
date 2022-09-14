@@ -2,10 +2,14 @@ from flask import Flask, request, Response
 import json
 import os
 import sys
+import subprocess
 import re
 import shutil
 
 app = Flask(__name__)
+
+filere = r'^[a-zA-Z0-9\.]{3,16}$'
+wordre = r'^[a-zA-Z0-9\.]{1,26}$'
 
 corpus_root="/var/www/txt/wembed/corpus/"
 
@@ -19,7 +23,7 @@ def list_corpus():
 def create_corpus():
     corpus_name = request.get_json()["name"]
 
-    assert re.match(r'^[a-zA-Z]{3,16}$', corpus_name)
+    assert re.match(filere, corpus_name)
     if os.path.isdir(corpus_root+corpus_name):
         return Response("{'error':'already exists'}", status=400, mimetype='application/json')
     else:
@@ -29,7 +33,7 @@ def create_corpus():
 @app.route("/corpus/<corpus_name>", methods=["DELETE"])
 def delete_corpus(corpus_name):
     corpus_name# = request.get_json()["name"]
-    assert re.match(r'^[a-zA-Z]{3,16}$', corpus_name)
+    assert re.match(filere, corpus_name)
     if os.path.isdir(corpus_root+corpus_name):
         shutil.rmtree(corpus_root+corpus_name)
     else:
@@ -37,13 +41,26 @@ def delete_corpus(corpus_name):
     return "Deleted corpus"
 
 @app.route("/corpus/<corpus_name>/dict", methods=["PUT"])
-def reinit_dict():
+def reinit_dict(corpus_name):
+    cmd = corpus_root+"/../scripts/update_dict.sh "+corpus_root+" "+corpus_name
     
-    return "recreate dict"
+    #ret=subprocess.run([corpus_root+"/../scripts/update_dict.sh", corpus_root, corpus_name])# -f all.txt
+    ret=subprocess.check_output(cmd.split(" "))# -f all.txt
+    return cmd+" - "+str(ret)+"recreated dict"
+
+@app.route("/corpus/<corpus_name>/picture/<word>", methods=["PUT"])
+def do_image(corpus_name, word):
+    assert re.match(filere, corpus_name)
+    assert re.match(wordre, word)
+    
+    cmd = corpus_root+"/../scripts/create_img.sh "+corpus_root+" " +corpus_name+ " "+word
+    ret=subprocess.check_output(cmd.split(" "))# -f all.txt
+    return cmd+" - "+str(ret)+"recreated dict"
+
 
 @app.route("/corpus/<corpus_name>", methods=["GET"])
 def corpus_details(corpus_name):
-    assert re.match(r'^[a-zA-Z]{1,16}$', corpus_name)
+    assert re.match(filere, corpus_name)
     if os.path.isdir(corpus_root+corpus_name):
         filelist = os.listdir( corpus_root+"/"+corpus_name)
         return Response(json.dumps(filelist), status=200, mimetype='application/json')
@@ -54,6 +71,6 @@ def corpus_details(corpus_name):
 def upload_file(corpus_name):
     file = request.files['file']
     #return  (file.filename)
-    assert re.match(r'^[a-zA-Z]{1,16}.[a-z]{3,3}$', file.filename)
+    assert re.match(filere, file.filename)
     file.save(os.path.join(corpus_root, corpus_name, file.filename))
     return "ok"
