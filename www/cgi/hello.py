@@ -9,7 +9,7 @@ import shutil
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000
 
-filere = r'^[a-zA-Z0-9\.]{1,16}$'
+filere = r'^[a-zA-Z0-9\.\-]{1,32}$'
 wordre = r'^[a-zA-Z0-9\.]{1,26}$'
 
 file_to_remove = ['all.txt', 'mymodel-occ', 'mymodel-300k', 'result.png', 'dict_info']
@@ -92,7 +92,12 @@ def upload_file(corpus_name):
     assert re.match(filere, corpus_name)
 
     file.save(os.path.join(corpus_root, corpus_name, file.filename))
-    return "ok"
+    ret = "saved"
+    if (file.filename.endswith('pdf')):
+        cmd = corpus_root+"../scripts/convert_pdf.sh "+ corpus_root+"/"+corpus_name+"/"+file.filename
+        ret += str(subprocess.check_output(cmd.split(" ")))
+        ret += "converted."
+    return ret
 
 @app.route("/corpus/<corpus_name>/<corpus_file>", methods=["DELETE"])
 def delete_file(corpus_name, corpus_file):
@@ -104,6 +109,16 @@ def delete_file(corpus_name, corpus_file):
     else:
         return Response("not found", status=404)
     
+@app.route("/corpus/<corpus_name>/<corpus_file>", methods=["GET"])
+def get_file(corpus_name, corpus_file):
+    assert re.match(filere, corpus_name)
+    assert re.match(filere, corpus_file)
+    src=corpus_root+"/"+corpus_name+"/"+corpus_file
+    if (os.path.exists(src)):
+        return send_file(src, mimetype="text/plain")
+    else:
+        return Response("not found", status=404)
+
     
 @app.route("/corpus/<corpus_name>/picture", methods=["GET"])
 def get_image(corpus_name):

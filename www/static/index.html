@@ -32,7 +32,7 @@
       <div class="row">
 	<div class="col-4">
 	  <ul>
-	    <li v-for="file in corpus_details">{{ file }} ( <span v-on:click="delete_file(file)">delete</span> )</li>
+	    <li v-for="file in corpus_details"><a :href='"/api/corpus/"+current_corpus_name+"/"+file'>{{ file }}</a> ( <span v-on:click="delete_file(file)">delete</span> )</li>
 	  </ul>
 	</div>
 	<div class="col-8">
