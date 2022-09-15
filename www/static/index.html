@@ -1,11 +1,45 @@
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
 
-<div id="app">{{ message }}
-  <button v-on:click="update_corpus()">update</button>
-  <div>
-    <ul>
-      <li v-for="item of corpus_list">{{ item }}</li>
-    </ul>
+<body>
+
+<div id="app">
+<div class="container">
+  <div class="row">
+    <div class="col-4">
+      <button v-on:click="update_corpus()">Update</button>
+      <input v-model="new_corpus_name">
+      <button v-on:click="create_corpus()">Create</button>
+      <div>
+	<ul>
+	  <li v-for="item of corpus_list"><span v-on:click="get_corpus_details(item)">{{ item }}</span>
+	    (<span v-on:click="delete_corpus(item)">Delete</span>)
+	  </li>
+	</ul>
+      </div>
+    </div>
+    <div class="col-8" v-if="current_corpus_name != ''">
+      <h1>{{ current_corpus_name }} <span v-if="loading"><font color="red"><i>Loading</i></font></span></h1>
+      <div>Upload new txt file: <input type="file" name="file" v-on:change="upload_file"><button v-on:click="submit_file()" value="Upload" :disabled="loading">Upload</button>      </div>
+      <div>Update Dict <button v-on:click="update_dict()" :disabled="loading">Click</button></div>
+      <div>Update image <input v-model="keyword"><button v-on:click="update_image()" disabled="loading">Update</button></div>
+      <div class="row">
+	<div class="col-3">
+	  <ul>
+	    <li v-for="file in corpus_details">{{ file }} ( <span v-on:click="delete_file(file)">delete</span> )</li>
+	  </ul>
+	</div>
+	<div class="col-9">
+	  <a :href="get_image_url" target="_blank"><img :src="get_image_url+'?rand='+rand" width="300"></a>
+	</div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -14,3 +48,5 @@
 
 <script src="js/app.js">
 </script>
+</body>
+</html>
