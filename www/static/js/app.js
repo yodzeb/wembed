@@ -5,7 +5,9 @@ const { createApp } = Vue
 createApp({
     data() {
 	return {
-	    corpus_list: ['a','b'],
+	    corpus_list: [],
+	    epoch: 20,
+	    window: 8,
 	    base_url:   "/api/",
 	    new_corpus_name : "NewCorpus",
 	    current_corpus_name : "",
@@ -89,7 +91,15 @@ createApp({
 	async update_dict() {
 	    this.loading = true;
 	    url = this.base_url+"/corpus/"+this.current_corpus_name+"/dict";
-	    var myInit = { method: 'PUT' };
+	    var myHeaders = new Headers();
+	    myHeaders.append("Content-Type", "application/json");
+	    var myInit = { method: 'PUT',
+			   headers: myHeaders,
+			   body: JSON.stringify({
+			       "epoch": this.epoch,
+			       "window": this.window
+			   })
+			 };
 	    await (fetch (url, myInit));
 	    this.loading = false;
 	},

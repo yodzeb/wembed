@@ -12,14 +12,14 @@ app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000
 filere = r'^[a-zA-Z0-9\.]{1,16}$'
 wordre = r'^[a-zA-Z0-9\.]{1,26}$'
 
-file_to_remove = ['all.txt', 'mymodel-occ', 'mymodel-300k', 'result.png']
+file_to_remove = ['all.txt', 'mymodel-occ', 'mymodel-300k', 'result.png', 'dict_info']
 
 corpus_root="/var/www/txt/wembed/corpus/"
 
 @app.route("/corpus", methods=["GET"])
 def list_corpus():
     filelist = os.listdir( corpus_root)
-    
+    filelist = [ f for f in filelist if os.path.isdir(corpus_root+"/"+f) ]
     return Response(json.dumps(filelist), status=200, mimetype='application/json')
 
 @app.route("/corpus", methods=["POST"])
@@ -45,8 +45,18 @@ def delete_corpus(corpus_name):
 
 @app.route("/corpus/<corpus_name>/dict", methods=["PUT"])
 def reinit_dict(corpus_name):
-    cmd = corpus_root+"/../scripts/update_dict.sh "+corpus_root+" "+corpus_name
-    
+    window = 8
+    epoch = 20
+    data = request.get_json()
+    if data:
+        if window in data:
+            assert type(data["window"]) == int and data["window"] < 20 and data["window"] > 0
+            window = data["window"]
+        if epoch in data:
+            assert type(data["epoch"]) == int and data["epoch"] < 20 and data["epoch"] > 0
+            epoch = data["epoch"]
+    cmd = corpus_root+"/../scripts/update_dict.sh "+corpus_root+" "+corpus_name+ " "+str(window) + " " + str(epoch)
+    #return cmd
     #ret=subprocess.run([corpus_root+"/../scripts/update_dict.sh", corpus_root, corpus_name])# -f all.txt
     ret=subprocess.check_output(cmd.split(" "))# -f all.txt
     return cmd+" - "+str(ret)+"recreated dict"
@@ -64,9 +74,9 @@ def do_image(corpus_name, word):
 @app.route("/corpus/<corpus_name>", methods=["GET"])
 def corpus_details(corpus_name):
     assert re.match(filere, corpus_name)
-    if os.path.isdir(corpus_root+corpus_name):
+    if os.path.isdir(corpus_root+"/"+corpus_name):
         filelist = os.listdir( corpus_root+"/"+corpus_name)
-        filelist = [ f for f in filelist if f not in file_to_remove]
+        filelist = [ f for f in filelist if f not in file_to_remove ]
         return Response(json.dumps(filelist), status=200, mimetype='application/json')
     else:
         return Response("not found", status=404)

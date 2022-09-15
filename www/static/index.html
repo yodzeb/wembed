@@ -27,15 +27,15 @@
     <div class="col-8" v-if="current_corpus_name != ''">
       <h1>{{ current_corpus_name }} <span v-if="loading"><font color="red"><i>Loading</i></font></span></h1>
       <div>Upload new txt file: <input type="file" name="file" v-on:change="upload_file"><button v-on:click="submit_file()" value="Upload" :disabled="loading">Upload</button>      </div>
-      <div>Update Dict <button v-on:click="update_dict()" :disabled="loading">Click</button></div>
-      <div>Update image <input v-model="keyword"><button v-on:click="update_image()" disabled="loading">Update</button></div>
+      <div>Update Dict window:<input v-model="window"> epoch : <input v-model="epoch"><button v-on:click="update_dict()" :disabled="loading">Click</button></div>
+      <div>Update image <input v-model="keyword"><button v-on:click="update_image()" :disabled="loading">Update</button></div>
       <div class="row">
-	<div class="col-3">
+	<div class="col-4">
 	  <ul>
 	    <li v-for="file in corpus_details">{{ file }} ( <span v-on:click="delete_file(file)">delete</span> )</li>
 	  </ul>
 	</div>
-	<div class="col-9">
+	<div class="col-8">
 	  <a :href="get_image_url" target="_blank"><img :src="get_image_url+'?rand='+rand" width="300"></a>
 	</div>
       </div>

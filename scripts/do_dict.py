@@ -99,7 +99,7 @@ def plot_graph(G, occ, root, working_dir):
     nx.draw_networkx_edges(H, pos, alpha=0.3, width=edgewidth, edge_color=ccolors)
     nx.draw_networkx_nodes(H, pos, node_size=nodesize, node_color="#210070", alpha=0.9)
     label_options = {"ec": "k", "fc": "white", "alpha": 0.7}
-    nx.draw_networkx_labels(H, pos, font_size=7, bbox=label_options)
+    nx.draw_networkx_labels(H, pos, font_size=8, bbox=label_options)
     fig.tight_layout()
     fig.savefig(working_dir+'/result.png', dpi=200)
     #plt.axis("off")
@@ -124,7 +124,16 @@ def main():
     parser.add_option("-w", "--word", action="store", type="string", dest="word")
     parser.add_option("-d", "--directory", action="store", type="string", dest="dir")
     parser.add_option("-a", "--redoall", action="store_true", dest="redo")
+    parser.add_option("-W", "--window", action="store", dest="window")
+    parser.add_option("-e", "--epoch", action="store", dest="epoch")
     (options, args) = parser.parse_args()
+    epoch = 10
+    window = 5
+    if options.window:
+        window = options.window
+    if options.epoch:
+        epoch = options.epoch
+    
     if options.filename:
         filename  = options.filename
         load=True
@@ -143,7 +152,7 @@ def main():
 
     if load:
         seq = wordseq(working_dir+"/"+filename)
-        model = gensim.models.Word2Vec(seq, min_count=2, window=10, vector_size=50, epochs=5)
+        model = gensim.models.Word2Vec(seq, min_count=2, window=int(window), vector_size=50, epochs=int(epoch))
         occ = do_occurence(working_dir+"/"+filename)
         print (occ)
         print ("Done.");
